@@ -41,6 +41,7 @@ typedef uint8 byte;
 typedef int32 rune;
 
 typedef _Bool bool;
+typedef int32 BOOL;
 
 typedef struct {
     void* buf;
@@ -67,6 +68,11 @@ typedef struct {
 #define UINT16_MAX 0xFFFFui16
 #define UINT32_MAX 0xFFFFFFFFui32
 #define UINT64_MAX 0xFFFFFFFFFFFFFFFFui64
+
+// process memory page or data size alignment
+// argument a must be a power of two
+#define align_up(x, a)   (((x) + ((a)-1)) & ~((a)-1))
+#define align_down(x, a) (((x) + (00000)) & ~((a)-1))
 
 // calculate the array length
 #ifndef arrlen
