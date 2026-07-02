@@ -3,6 +3,9 @@
 
 #include "c_types.h"
 
+// disable special warnings for /Wall
+#pragma warning(disable: 4142)
+
 typedef int32 BOOL;
 typedef uint8 BOOLEAN;
 
@@ -20,7 +23,9 @@ typedef uint16 USHORT;
 typedef uint32 ULONG;
 typedef uint64 ULONGLONG;
 
-typedef uint UINT;
+typedef int          INT;
+typedef unsigned int UINT;
+
 typedef uint SIZE_T;
 typedef uint ULONG_PTR;
 
