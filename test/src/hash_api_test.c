@@ -6,7 +6,7 @@
 #include "hash_api.h"
 #include "test.h"
 
-bool TestFindAPI()
+bool TestFindAPI_MH()
 {
 #ifdef _WIN64
     uint key = 0x6A6867C72D518853;
@@ -18,7 +18,7 @@ bool TestFindAPI()
     uint  modHash   = CalcModHash_A(module, key);
     uint  procHash  = CalcProcHash(procedure, key);
 
-    void* proc = FindAPI(modHash, procHash, key);
+    void* proc = FindAPI_MH(modHash, procHash, key);
     if (proc != &WinExec)
     {
         printf_s("Result:  %llX\n", (uint64)proc);
@@ -30,7 +30,12 @@ bool TestFindAPI()
     return true;
 }
 
-bool TestFindAPI_ML()
+bool TestFindAPI_MA()
+{
+    return true;
+}
+
+bool TestFindAPI_MHL()
 {
 #ifdef _WIN64
     uint key = 0x6A6867C72D518853;
@@ -42,8 +47,8 @@ bool TestFindAPI_ML()
     uint  modHash   = CalcModHash_A(module, key);
     uint  procHash  = CalcProcHash(procedure, key);\
 
-    void* list = GetInMemoryOrderModuleList();
-    void* proc = FindAPI_ML(list, modHash, procHash, key);
+    PML* list = GetDefaultPML();
+    void* proc = FindAPI_MHL(list, modHash, procHash, key);
     if (proc != &WinExec)
     {
         printf_s("Result:  %llX\n", (uint64)proc);
@@ -52,6 +57,11 @@ bool TestFindAPI_ML()
         return false;
     }
     printf_s("WinExec: 0x%llX\n", (uint64)proc);
+    return true;
+}
+
+bool TestFindAPI_MAL()
+{
     return true;
 }
 
@@ -109,7 +119,7 @@ bool TestForwarded()
     uint modHash  = CalcModHash_A(module, key);
     uint procHash = CalcProcHash(procedure, key);
 
-    void* proc = FindAPI(modHash, procHash, key);
+    void* proc = FindAPI_MH(modHash, procHash, key);
     if (proc != closeState)
     {
         printf_s("Result:     %llX\n", (uint64)proc);
