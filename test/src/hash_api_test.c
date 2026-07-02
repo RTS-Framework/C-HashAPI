@@ -1,10 +1,21 @@
 #pragma warning(disable: 4668)
 
 #include <stdio.h>
-#include <windows.h>
 #include "c_types.h"
 #include "hash_api.h"
 #include "test.h"
+
+// define the procedure about IAT.
+typedef void* HMODULE;
+
+__declspec(dllimport)
+UINT __stdcall WinExec(LPCSTR lpCmdLine, UINT uCmdShow);
+
+__declspec(dllimport)
+HMODULE __stdcall LoadLibraryA(LPSTR module);
+
+__declspec(dllimport)
+void* __stdcall GetProcAddress(HMODULE module, LPSTR procedure);
 
 bool TestFindAPI_MH()
 {
@@ -47,8 +58,8 @@ bool TestFindAPI_MHL()
     uint  modHash   = CalcModHash_A(module, key);
     uint  procHash  = CalcProcHash(procedure, key);\
 
-    PML* list = GetDefaultPML();
-    void* proc = FindAPI_MHL(list, modHash, procHash, key);
+    PML* pml = GetDefaultPML();
+    void* proc = FindAPI_MHL(pml, modHash, procHash, key);
     if (proc != &WinExec)
     {
         printf_s("Result:  %llX\n", (uint64)proc);
@@ -96,6 +107,11 @@ bool TestFindAPI_W()
         return false;
     }
     printf_s("WinExec: 0x%llX\n", (uint64)proc);
+    return true;
+}
+
+bool TestNotFound()
+{
     return true;
 }
 
