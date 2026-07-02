@@ -27,6 +27,7 @@ typedef int          INT;
 typedef unsigned int UINT;
 
 typedef uint SIZE_T;
+typedef uint UINT_PTR;
 typedef uint ULONG_PTR;
 
 typedef void* POINTER;
