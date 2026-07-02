@@ -36,11 +36,11 @@ void* FindAPI_MA(void* module, uint procedure, uint key)
 }
 
 __declspec(noinline)
-void* FindAPI_MHL(PML* list, uint module, uint procedure, uint key)
+void* FindAPI_MHL(PML* pml, uint module, uint procedure, uint key)
 {
     uint seedHash = calcSeedHash(key);
     uint keyHash  = calcKeyHash(seedHash, key);
-    uintptr mod = (uintptr)list;
+    uintptr mod = (uintptr)pml;
     for (;; mod = *(uintptr*)(mod))
     {
     #ifdef _WIN64
@@ -51,6 +51,28 @@ void* FindAPI_MHL(PML* list, uint module, uint procedure, uint key)
         if (modName == 0x00)
         {
             break;
+        }
+        // calculate module name hash
+        uint modHash = seedHash;
+    #ifdef _WIN64
+        uint16 nameLen = *(uint16*)(mod + 74);
+    #elif _WIN32
+        uint16 nameLen = *(uint16*)(mod + 38);
+    #endif
+        for (uint16 i = 0; i < nameLen - 2; i++)
+        {
+            byte b = *(byte*)(modName + i);
+            if (b >= 'a')
+            {
+                b -= 0x20;
+            }
+            modHash = ror(modHash, ROR_MOD);
+            modHash += b;
+        }
+        modHash += seedHash + keyHash;
+        if (modHash != module)
+        {
+            continue;
         }
     #ifdef _WIN64
         uintptr modBase = *(uintptr*)(mod + 32);
@@ -78,28 +100,6 @@ void* FindAPI_MHL(PML* list, uint module, uint procedure, uint key)
             continue;
         }
         uintptr eat = modBase + eatRVA;
-        // calculate module name hash
-        uint modHash = seedHash;
-    #ifdef _WIN64
-        uint16 nameLen = *(uint16*)(mod + 74);
-    #elif _WIN32
-        uint16 nameLen = *(uint16*)(mod + 38);
-    #endif
-        for (uint16 i = 0; i < nameLen - 2; i++)
-        {
-            byte b = *(byte*)(modName + i);
-            if (b >= 'a')
-            {
-                b -= 0x20;
-            }
-            modHash = ror(modHash, ROR_MOD);
-            modHash += b;
-        }
-        modHash += seedHash + keyHash;
-        if (modHash != module)
-        {
-            continue;
-        }
         // calculate procedure name hash
         uint32  numNames  = *(uint32*)(eat + 24);
         uintptr procNames = modBase + (uintptr)(*(uint32*)(eat + 32));
@@ -175,14 +175,14 @@ void* FindAPI_MHL(PML* list, uint module, uint procedure, uint key)
             procName = (byte*)((uintptr)exportName + dot + 1);
             modHash  = CalcModHash_A(dllName, key);
             procHash = CalcProcHash(procName, key);
-            return FindAPI_MHL(list, modHash, procHash, key);
+            return FindAPI_MHL(pml, modHash, procHash, key);
         }
     }
     return NULL;
 }
 
 __declspec(noinline)
-void* FindAPI_MAL(PML* list, void* module, uint procedure, uint key)
+void* FindAPI_MAL(PML* pml, void* module, uint procedure, uint key)
 {
     uintptr modBase  = (uintptr)module;
     uintptr peHeader = modBase + (uintptr)(*(uint32*)(modBase + 60));
@@ -284,7 +284,7 @@ void* FindAPI_MAL(PML* list, void* module, uint procedure, uint key)
         byte* pName = (byte*)((uintptr)exportName + dot + 1);
         uint  mHash = CalcModHash_A(dllName, key);
         uint  pHash = CalcProcHash(pName, key);
-        return FindAPI_MHL(list, mHash, pHash, key);
+        return FindAPI_MHL(pml, mHash, pHash, key);
     }
     return NULL;
 }
