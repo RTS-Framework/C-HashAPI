@@ -9,8 +9,10 @@
 bool TestLibMemory();
 bool TestLibString();
 
-bool TestFindAPI();
-bool TestFindAPI_ML();
+bool TestFindAPI_MH();
+bool TestFindAPI_MA();
+bool TestFindAPI_MHL();
+bool TestFindAPI_MAL();
 bool TestFindAPI_A();
 bool TestFindAPI_W();
 bool TestForwarded();
@@ -28,8 +30,10 @@ static unit tests[] = {
     { "Lib_Memory", TestLibMemory },
     { "Lib_String", TestLibString },
 
-    { "FindAPI",        TestFindAPI        },
-    { "FindAPI_ML",     TestFindAPI_ML     },
+    { "FindAPI_MH",     TestFindAPI_MH     },
+    { "FindAPI_MA",     TestFindAPI_MA     },
+    { "FindAPI_MHL",    TestFindAPI_MHL    },
+    { "FindAPI_MAL",    TestFindAPI_MAL    },
     { "FindAPI_A",      TestFindAPI_A      },
     { "FindAPI_W",      TestFindAPI_W      },
     { "Forwarded",      TestForwarded      },
