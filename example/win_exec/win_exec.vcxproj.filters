@@ -34,5 +34,14 @@
     <ClInclude Include="..\..\include\lib_memory.h">
       <Filter>Header</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\win_types.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\win_structs.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\pe_image.h">
+      <Filter>Header</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
