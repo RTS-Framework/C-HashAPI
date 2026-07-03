@@ -13,7 +13,7 @@ uint EntryMain() {
     uint pHash = 0x3CA3C21A;
     uint hKey  = 0xCADE960B;
 #endif
-    WinExec_t WinExec = FindAPI(mHash, pHash, hKey);
+    WinExec_t WinExec = FindAPI_MH(mHash, pHash, hKey);
     if (WinExec == NULL)
     {
         return 1;
