@@ -4,9 +4,9 @@
 #include "c_types.h"
 #include "win_types.h"
 
-typedef struct {
-    struct LIST_ENTRY* Flink;
-    struct LIST_ENTRY* Blink;
+typedef struct _LIST_ENTRY {
+    struct _LIST_ENTRY* Flink;
+    struct _LIST_ENTRY* Blink;
 } LIST_ENTRY;
 
 typedef struct {
@@ -80,14 +80,14 @@ typedef struct {
     PVOID ApiSetMap;
 } PEB;
 
-typedef struct {
+typedef struct _NT_TIB {
     PVOID ExceptionList;
 	PVOID StackBase;
 	PVOID StackLimit;
 	PVOID SubSystemTIB;
     PVOID FiberData;
 	PVOID ArbitraryUserPointer;
-    struct NT_TIB* Self;
+    struct _NT_TIB* Self;
 } NT_TIB;
 
 typedef struct {
