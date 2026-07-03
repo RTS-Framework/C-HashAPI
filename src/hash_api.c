@@ -29,6 +29,7 @@ void* FindAPI_MH(uint module, uint procedure, uint key)
     return FindAPI_MHL(pml, module, procedure, key);
 }
 
+__declspec(noinline)
 void* FindAPI_MA(void* module, uint procedure, uint key)
 {
     PML* pml = GetDefaultPML();
@@ -37,6 +38,71 @@ void* FindAPI_MA(void* module, uint procedure, uint key)
 
 __declspec(noinline)
 void* FindAPI_MHL(PML* pml, uint module, uint procedure, uint key)
+{
+    uint seedHash = calcSeedHash(key);
+    uint keyHash  = calcKeyHash(seedHash, key);
+    // enumerate the list of modules
+    LIST_ENTRY* head = &pml->Links;
+    for (LIST_ENTRY* link = head->Flink; link != head; link = link->Flink)
+    {
+        PML* cur = (PML*)((uintptr)(link) - offsetof(PML, Links));
+        // check the module information
+        PWSTR  nameBuf = cur->BaseDllName.Buffer;
+        USHORT nameLen = cur->BaseDllName.Length;
+        if (nameBuf == NULL || nameLen == 0)
+        {
+            continue;
+        }
+        // calculate and compare module name hash
+        uint modHash = seedHash;
+        for (uint16 i = 0; i < nameLen; i++)
+        {
+            byte b = *((byte*)nameBuf+i);
+            if (b >= 'a')
+            {
+                b -= 0x20;
+            }
+            modHash = ror(modHash, ROR_MOD);
+            modHash += b;
+        }
+        modHash += seedHash + keyHash;
+        if (modHash != module)
+        {
+            continue;
+        }
+        // parse pe image structure
+        uintptr dllBase  = (uintptr)(cur->DllBase);
+        uintptr ntOffset = (uintptr)(*(uint32*)(dllBase + DOS_HEADER_SIZE - 4));
+        Image_NTHeaders* ntHeaders = (Image_NTHeaders*)(dllBase + ntOffset);
+    #ifdef _WIN64
+        // check this module actually a x64 PE image
+        if (ntHeaders->OptionalHeader.Magic != 0x020B)
+        {
+            continue;
+        }
+    #endif
+        // get RVA of export address tables(EAT)
+        Image_DataDirectory* DD = &ntHeaders->OptionalHeader.DataDirectory;
+        Image_DataDirectory EAT = DD[IMAGE_DIRECTORY_ENTRY_EXPORT];
+        if (EAT.VirtualAddress == 0 || EAT.Size == 0)
+        {
+            continue;
+        }
+
+
+
+        return 0x1234;
+
+    }
+
+
+
+
+    return NULL;
+}
+
+__declspec(noinline)
+void* FindAPI_MHL_old(PML* pml, uint module, uint procedure, uint key)
 {
     uint seedHash = calcSeedHash(key);
     uint keyHash  = calcKeyHash(seedHash, key);
@@ -389,7 +455,8 @@ PML* GetDefaultPML()
     TEB* teb = (TEB*)__readfsdword(0x18);
 #endif
     PEB_LDR_DATA* ldr = teb->ProcessEnvironmentBlock->LDR;
-    return (PML*)(ldr->InMemoryOrderModuleList.Flink);
+    LIST_ENTRY* entry = ldr->InMemoryOrderModuleList.Flink;
+    return (PML*)((uintptr)entry - offsetof(PML, Links));
 }
 
 #define KEY_SIZE_32 4
