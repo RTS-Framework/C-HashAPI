@@ -43,6 +43,30 @@ bool TestFindAPI_MH()
 
 bool TestFindAPI_MA()
 {
+    HMODULE hModule = LoadLibraryA("kernel32.dll");
+    if (hModule == NULL)
+    {
+        printf_s("failed to load kernel32.dll\n");
+        return false;
+    }
+
+#ifdef _WIN64
+    uint key = 0x6A6867C72D518853;
+#elif _WIN32
+    uint key = 0xCADE960B;
+#endif
+    byte* procedure = "WinExec";
+    uint  procHash  = CalcProcHash(procedure, key);
+
+    void* proc = FindAPI_MA(hModule, procHash, key);
+    if (proc != &WinExec)
+    {
+        printf_s("Result:  %llX\n", (uint64)proc);
+        printf_s("WinExec: %llX\n", (uint64)(&WinExec));
+        printf_s("WinExec address is incorrect\n");
+        return false;
+    }
+    printf_s("WinExec: 0x%llX\n", (uint64)proc);
     return true;
 }
 
@@ -58,7 +82,7 @@ bool TestFindAPI_MHL()
     uint  modHash   = CalcModHash_A(module, key);
     uint  procHash  = CalcProcHash(procedure, key);\
 
-    PML* pml = GetDefaultPML();
+    PML*  pml  = GetDefaultPML();
     void* proc = FindAPI_MHL(pml, modHash, procHash, key);
     if (proc != &WinExec)
     {
@@ -73,6 +97,31 @@ bool TestFindAPI_MHL()
 
 bool TestFindAPI_MAL()
 {
+    HMODULE hModule = LoadLibraryA("kernel32.dll");
+    if (hModule == NULL)
+    {
+        printf_s("failed to load kernel32.dll\n");
+        return false;
+    }
+
+#ifdef _WIN64
+    uint key = 0x6A6867C72D518853;
+#elif _WIN32
+    uint key = 0xCADE960B;
+#endif
+    byte* procedure = "WinExec";
+    uint  procHash  = CalcProcHash(procedure, key);
+
+    PML*  pml  = GetDefaultPML();
+    void* proc = FindAPI_MAL(pml, hModule, procHash, key);
+    if (proc != &WinExec)
+    {
+        printf_s("Result:  %llX\n", (uint64)proc);
+        printf_s("WinExec: %llX\n", (uint64)(&WinExec));
+        printf_s("WinExec address is incorrect\n");
+        return false;
+    }
+    printf_s("WinExec: 0x%llX\n", (uint64)proc);
     return true;
 }
 
@@ -112,6 +161,12 @@ bool TestFindAPI_W()
 
 bool TestNotFound()
 {
+    void* proc = FindAPI_MH(0x1234, 0x5678, 0x1212);
+    if (proc != NULL)
+    {
+        printf_s("still found\n");
+        return false;
+    }
     return true;
 }
 
