@@ -94,159 +94,92 @@ void* FindAPI_MAL(PML* pml, void* module, uint procedure, uint key)
     }
 #endif
     // get RVA of export address tables(EAT)
-    Image_DataDirectory* DD = &ntHeaders->OptionalHeader.DataDirectory;
+    Image_DataDirectory* DD = &ntHeaders->OptionalHeader.DataDirectory[0];
     Image_DataDirectory EAT = DD[IMAGE_DIRECTORY_ENTRY_EXPORT];
     if (EAT.VirtualAddress == 0 || EAT.Size == 0)
     {
         return NULL;
     }
-
-
-    return NULL;
-}
-
-__declspec(noinline)
-void* FindAPI_MHL_old(PML* pml, uint module, uint procedure, uint key)
-{
-    uint seedHash = calcSeedHash(key);
-    uint keyHash  = calcKeyHash(seedHash, key);
-    uintptr mod = (uintptr)pml;
-    for (;; mod = *(uintptr*)(mod))
+    // get export directory structure
+    Image_ExportDirectory* dir = (Image_ExportDirectory*)(dllBase + EAT.VirtualAddress);
+    // calculate procedure name hash
+    uint32  numNames  = dir->NumberOfNames;
+    uintptr procNames = dllBase + dir->AddressOfNames;
+    for (uint32 i = 0; i < numNames; i++)
     {
-    #ifdef _WIN64
-        uintptr modName = *(uintptr*)(mod + 80);
-    #elif _WIN32
-        uintptr modName = *(uintptr*)(mod + 40);
-    #endif
-        if (modName == 0x00)
+        // calculate procedure name address
+        uint32 nameRVA  = *(uint32*)(procNames + (uintptr)(i * 4));
+        byte*  procName = (byte*)(dllBase + nameRVA);
+        uint   procHash = seedHash;
+        for (;;)
         {
-            break;
-        }
-        // calculate module name hash
-        uint modHash = seedHash;
-    #ifdef _WIN64
-        uint16 nameLen = *(uint16*)(mod + 74);
-    #elif _WIN32
-        uint16 nameLen = *(uint16*)(mod + 38);
-    #endif
-        for (uint16 i = 0; i < nameLen - 2; i++)
-        {
-            byte b = *(byte*)(modName + i);
-            if (b >= 'a')
+            byte b = *procName;
+            if (b == 0x00)
             {
-                b -= 0x20;
+                break;
             }
-            modHash = ror(modHash, ROR_MOD);
-            modHash += b;
+            procHash = ror(procHash, ROR_PROC);
+            procHash += b;
+            procName++;
         }
-        modHash += seedHash + keyHash;
-        if (modHash != module)
+        // calculate the finally hash and compare it
+        procHash += seedHash + keyHash;
+        if (procHash != procedure)
         {
             continue;
         }
-    #ifdef _WIN64
-        uintptr modBase = *(uintptr*)(mod + 32);
-    #elif _WIN32
-        uintptr modBase = *(uintptr*)(mod + 16);
-    #endif
-        uintptr peHeader = modBase + (uintptr)(*(uint32*)(modBase + 60));
-    #ifdef _WIN64
-        // check this module actually a x64 PE image
-        if (*(uint16*)(peHeader + 24) != 0x020B)
+        // calculate the AddressOfFunctions
+        uintptr funcTable = dllBase + dir->AddressOfFunctions;
+        // calculate the AddressOfNameOrdinals
+        uintptr ordinalTable = dllBase + dir->AddressOfNameOrdinals;
+        // calculate offset of ordinal
+        uint16 ordinal = *(uint16*)(ordinalTable + (uintptr)(i * 2));
+        // calculate the function RVA
+        uint32 funcRVA = *(uint32*)(funcTable + (uintptr)(ordinal * 4));
+        // check is forwarded export function
+        if (funcRVA < EAT.VirtualAddress || funcRVA >= EAT.VirtualAddress + EAT.Size)
         {
-            continue;
+            return (void*)(dllBase + funcRVA);
         }
-    #endif
-        // get RVA of export address tables(EAT)
-    #ifdef _WIN64
-        uint32 eatRVA  = *(uint32*)(peHeader + 136);
-        uint32 eatSize = *(uint32*)(peHeader + 140);
-    #elif _WIN32
-        uint32 eatRVA  = *(uint32*)(peHeader + 120);
-        uint32 eatSize = *(uint32*)(peHeader + 124);
-    #endif
-        if (eatRVA == 0 || eatSize == 0)
+        // get the export name
+        byte* exportName = (byte*)(dllBase + funcRVA);
+        // search the last "." in function name
+        byte* src = exportName;
+        uint  dot = 0;
+        for (uint j = 0;; j++)
         {
-            continue;
+            byte b = *src;
+            if (b == '.')
+            {
+                dot = j;
+            }
+            if (b == 0x00)
+            {
+                break;
+            }
+            src++;
         }
-        uintptr eat = modBase + eatRVA;
-        // calculate procedure name hash
-        uint32  numNames  = *(uint32*)(eat + 24);
-        uintptr procNames = modBase + (uintptr)(*(uint32*)(eat + 32));
-        for (uint32 i = 0; i < numNames; i++)
+        // use "mem_init" for prevent incorrect compiler
+        // optimize and generate incorrect instruction
+        byte dllName[512];
+        mem_init(dllName, sizeof(dllName));
+        // prevent array bound when call mem_copy
+        if (dot > 500)
         {
-            // calculate procedure name address
-            uint32 nameRVA  = *(uint32*)(procNames + (uintptr)(i * 4));
-            byte*  procName = (byte*)(modBase + nameRVA);
-            uint   procHash = seedHash;
-            for (;;)
-            {
-                byte b = *procName;
-                if (b == 0x00)
-                {
-                    break;
-                }
-                procHash = ror(procHash, ROR_PROC);
-                procHash += b;
-                procName++;
-            }
-            // calculate the finally hash and compare it
-            procHash += seedHash + keyHash;
-            if (procHash != procedure)
-            {
-                continue;
-            }
-            // calculate the AddressOfFunctions
-            uintptr funcTable = modBase + (uintptr)(*(uint32*)(eat + 28));
-            // calculate the AddressOfNameOrdinals
-            uintptr ordinalTable = modBase + (uintptr)(*(uint32*)(eat + 36));
-            // calculate offset of ordinal
-            uint16 ordinal = *(uint16*)(ordinalTable + (uintptr)(i * 2));
-            // calculate the function RVA
-            uint32 funcRVA = *(uint32*)(funcTable + (uintptr)(ordinal * 4));
-            // check is forwarded export function
-            if (funcRVA < eatRVA || funcRVA >= eatRVA + eatSize)
-            {
-                return (void*)(modBase + funcRVA);
-            }
-            // search the last "." in function name
-            byte* exportName = (byte*)(modBase + funcRVA);
-            byte* src = exportName;
-            uint  dot = 0;
-            for (uint j = 0;; j++)
-            {
-                byte b = *src;
-                if (b == '.')
-                {
-                    dot = j;
-                }
-                if (b == 0x00)
-                {
-                    break;
-                }
-                src++;
-            }
-            // use "mem_init" for prevent incorrect compiler
-            // optimize and generate incorrect shellcode
-            byte dllName[512];
-            mem_init(dllName, sizeof(dllName));
-            // prevent array bound when call mem_copy
-            if (dot > 500)
-            {
-                dot = 500;
-            }
-            mem_copy(dllName, exportName, dot + 1);
-            // build DLL name
-            dllName[dot+1] = 'd';
-            dllName[dot+2] = 'l';
-            dllName[dot+3] = 'l';
-            dllName[dot+4] = 0x00;
-            // build module and procedure hash
-            procName = (byte*)((uintptr)exportName + dot + 1);
-            modHash  = CalcModHash_A(dllName, key);
-            procHash = CalcProcHash(procName, key);
-            return FindAPI_MHL(pml, modHash, procHash, key);
+            dot = 500;
         }
+        mem_copy(dllName, exportName, dot + 1);
+        // build DLL name
+        dllName[dot+1] = 'd';
+        dllName[dot+2] = 'l';
+        dllName[dot+3] = 'l';
+        dllName[dot+4] = 0x00;
+        // build procedure name
+        procName = (byte*)((uintptr)exportName + dot + 1);
+        // build module and procedure hash
+        uint mHash = CalcModHash_A(dllName, key);
+        uint pHash = CalcProcHash(procName, key);
+        return FindAPI_MHL(pml, mHash, pHash, key);
     }
     return NULL;
 }
