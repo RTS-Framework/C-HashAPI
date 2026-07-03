@@ -167,6 +167,19 @@ bool TestNotFound()
         printf_s("still found\n");
         return false;
     }
+
+    HMODULE hModule = LoadLibraryA("kernel32.dll");
+    if (hModule == NULL)
+    {
+        printf_s("failed to load kernel32.dll\n");
+        return false;
+    }
+    proc = FindAPI_MA(hModule, 0x5678, 0x1212);
+    if (proc != NULL)
+    {
+        printf_s("still found\n");
+        return false;
+    }
     return true;
 }
 
