@@ -11,6 +11,29 @@
 #define DLL_THREAD_ATTACH  2
 #define DLL_THREAD_DETACH  3
 
+#define IMAGE_FILE_MACHINE_I386  0x014C
+#define IMAGE_FILE_MACHINE_AMD64 0x8664
+
+#define IMAGE_FILE_RELOCS_STRIPPED  0x0001
+#define IMAGE_FILE_EXECUTABLE_IMAGE 0x0002
+#define IMAGE_FILE_DLL              0x2000
+
+#define IMAGE_DIRECTORY_ENTRY_EXPORT         0
+#define IMAGE_DIRECTORY_ENTRY_IMPORT         1
+#define IMAGE_DIRECTORY_ENTRY_RESOURCE       2
+#define IMAGE_DIRECTORY_ENTRY_EXCEPTION      3
+#define IMAGE_DIRECTORY_ENTRY_SECURITY       4
+#define IMAGE_DIRECTORY_ENTRY_BASERELOC      5
+#define IMAGE_DIRECTORY_ENTRY_DEBUG          6
+#define IMAGE_DIRECTORY_ENTRY_ARCHITECTURE   7
+#define IMAGE_DIRECTORY_ENTRY_GLOBALPTR      8
+#define IMAGE_DIRECTORY_ENTRY_TLS            9
+#define IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG    10
+#define IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT   11
+#define IMAGE_DIRECTORY_ENTRY_IAT            12
+#define IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT   13
+#define IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR 14
+
 typedef struct {
     WORD  Machine;
     WORD  NumberOfSections;
@@ -119,5 +142,19 @@ typedef struct {
     WORD  NumberOfLineNumbers;
     DWORD Characteristics;
 } Image_SectionHeader;
+
+typedef struct {
+   DWORD Characteristics;
+   DWORD TimeDateStamp;
+   WORD  MajorVersion;
+   WORD  MinorVersion;
+   DWORD Name;
+   DWORD Base;
+   DWORD NumberOfFunctions;
+   DWORD NumberOfNames;
+   DWORD AddressOfFunctions;
+   DWORD AddressOfNames;
+   DWORD AddressOfNameOrdinals;
+} Image_ExportDirectory;
 
 #endif // PE_IMAGE_H
