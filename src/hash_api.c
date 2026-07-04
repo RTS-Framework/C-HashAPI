@@ -39,6 +39,10 @@ void* FindAPI_MA(void* module, uint procedure, uint key)
 __declspec(noinline)
 void* FindAPI_MHL(PML* pml, uint module, uint procedure, uint key)
 {
+    if (pml == NULL)
+    {
+        return NULL;
+    }
     // prepare hash for calculate
     uint seedHash = calcSeedHash(key);
     uint keyHash  = calcKeyHash(seedHash, key);
@@ -102,15 +106,17 @@ void* FindAPI_MAL(PML* pml, void* module, uint procedure, uint key)
     }
     // get export directory structure
     Image_ExportDirectory* dir = (Image_ExportDirectory*)(dllBase + EAT.VirtualAddress);
-    // calculate procedure name hash
-    uint32  numNames  = dir->NumberOfNames;
-    uintptr procNames = dllBase + dir->AddressOfNames;
+    // process EAT arrays
+    uint32* nameTable = (uint32*)(dllBase + dir->AddressOfNames);
+    uint32* funcTable = (uint32*)(dllBase + dir->AddressOfFunctions);
+    uint16* ordiTable = (uint16*)(dllBase + dir->AddressOfNameOrdinals);
+    // enumerate exported names
+    uint32 numNames = dir->NumberOfNames;
     for (uint32 i = 0; i < numNames; i++)
     {
-        // calculate procedure name address
-        uint32 nameRVA  = *(uint32*)(procNames + (uintptr)(i * 4));
-        byte*  procName = (byte*)(dllBase + nameRVA);
-        uint   procHash = seedHash;
+        // lookup procedure name by index
+        byte* procName = (byte*)(dllBase + nameTable[i]);
+        uint  procHash = seedHash;
         for (;;)
         {
             byte b = *procName;
@@ -128,14 +134,8 @@ void* FindAPI_MAL(PML* pml, void* module, uint procedure, uint key)
         {
             continue;
         }
-        // calculate the AddressOfFunctions
-        uintptr funcTable = dllBase + dir->AddressOfFunctions;
-        // calculate the AddressOfNameOrdinals
-        uintptr ordinalTable = dllBase + dir->AddressOfNameOrdinals;
-        // calculate offset of ordinal
-        uint16 ordinal = *(uint16*)(ordinalTable + (uintptr)(i * 2));
-        // calculate the function RVA
-        uint32 funcRVA = *(uint32*)(funcTable + (uintptr)(ordinal * 4));
+        // name[i] -> ordinal[i] -> funcRVA[ordinal]
+        uint32 funcRVA = funcTable[ordiTable[i]];
         // check is forwarded export function
         if (funcRVA < EAT.VirtualAddress || funcRVA >= EAT.VirtualAddress + EAT.Size)
         {
