@@ -159,30 +159,6 @@ bool TestFindAPI_W()
     return true;
 }
 
-bool TestNotFound()
-{
-    void* proc = FindAPI_MH(0x1234, 0x5678, 0x1212);
-    if (proc != NULL)
-    {
-        printf_s("still found\n");
-        return false;
-    }
-
-    HMODULE hModule = LoadLibraryA("kernel32.dll");
-    if (hModule == NULL)
-    {
-        printf_s("failed to load kernel32.dll\n");
-        return false;
-    }
-    proc = FindAPI_MA(hModule, 0x5678, 0x1212);
-    if (proc != NULL)
-    {
-        printf_s("still found\n");
-        return false;
-    }
-    return true;
-}
-
 bool TestForwarded()
 {
     HMODULE hModule = LoadLibraryA("kernel32.dll");
@@ -212,6 +188,49 @@ bool TestForwarded()
         return false;
     }
     printf_s("CloseState: 0x%llX\n", (uint64)proc);
+    return true;
+}
+
+bool TestNotFound()
+{
+    void* proc = FindAPI_MH(0x1234, 0x5678, 0x1212);
+    if (proc != NULL)
+    {
+        printf_s("still found\n");
+        return false;
+    }
+
+    HMODULE hModule = LoadLibraryA("kernel32.dll");
+    if (hModule == NULL)
+    {
+        printf_s("failed to load kernel32.dll\n");
+        return false;
+    }
+    proc = FindAPI_MA(hModule, 0x5678, 0x1212);
+    if (proc != NULL)
+    {
+        printf_s("still found\n");
+        return false;
+    }
+    return true;
+}
+
+bool TestNULLArgument()
+{
+    void* proc = FindAPI_MHL(NULL, 0x1234, 0x5678, 0x1212);
+    if (proc != NULL)
+    {
+        printf_s("still found\n");
+        return false;
+    }
+
+    PML* pml = GetDefaultPML();
+    proc = FindAPI_MAL(pml, NULL, 0x5678, 0x1212);
+    if (proc != NULL)
+    {
+        printf_s("still found\n");
+        return false;
+    }
     return true;
 }
 
