@@ -83,6 +83,10 @@ void* FindAPI_MHL(PML* pml, uint module, uint procedure, uint key)
 __declspec(noinline)
 void* FindAPI_MAL(PML* pml, void* module, uint procedure, uint key)
 {
+    if (module == NULL)
+    {
+        return NULL;
+    }
     // prepare hash for calculate
     uint seedHash = calcSeedHash(key);
     uint keyHash  = calcKeyHash(seedHash, key);
