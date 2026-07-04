@@ -15,8 +15,9 @@ bool TestFindAPI_MHL();
 bool TestFindAPI_MAL();
 bool TestFindAPI_A();
 bool TestFindAPI_W();
-bool TestNotFound();
 bool TestForwarded();
+bool TestNotFound();
+bool TestNULLArgument();
 bool TestCalcModHash32();
 bool TestCalcModHash64();
 bool TestCalcProcHash32();
@@ -37,8 +38,9 @@ static unit tests[] = {
     { "FindAPI_MAL",    TestFindAPI_MAL    },
     { "FindAPI_A",      TestFindAPI_A      },
     { "FindAPI_W",      TestFindAPI_W      },
-    { "NotFound",       TestNotFound       },
     { "Forwarded",      TestForwarded      },
+    { "NotFound",       TestNotFound       },
+    { "NULLArgument",   TestNULLArgument   },
     { "CalcModHash32",  TestCalcModHash32  },
     { "CalcModHash64",  TestCalcModHash64  },
     { "CalcProcHash32", TestCalcProcHash32 },
