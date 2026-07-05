@@ -17,27 +17,32 @@ HMODULE __stdcall LoadLibraryA(LPSTR module);
 __declspec(dllimport)
 void* __stdcall GetProcAddress(HMODULE module, LPSTR procedure);
 
-bool TestFindAPI_MH()
+bool TestFindMod_MH()
 {
+    HMODULE expected = LoadLibraryA("kernel32.dll");
+    if (expected == NULL)
+    {
+        printf_s("failed to load kernel32.dll\n");
+        return false;
+    }
+
 #ifdef _WIN64
     uint key = 0x6A6867C72D518853;
 #elif _WIN32
     uint key = 0xCADE960B;
 #endif
-    byte* module    = "kernel32.dll";
-    byte* procedure = "WinExec";
-    uint  modHash   = CalcModHash_A(module, key);
-    uint  procHash  = CalcProcHash(procedure, key);
+    byte* module  = "kernel32.dll";
+    uint  modHash = CalcModHash_A(module, key);
 
-    void* proc = FindAPI_MH(modHash, procHash, key);
-    if (proc != &WinExec)
+    void* result = FindMod_MH(modHash, key);
+    if (result != expected)
     {
-        printf_s("Result:  %llX\n", (uint64)proc);
-        printf_s("WinExec: %llX\n", (uint64)(&WinExec));
-        printf_s("WinExec address is incorrect\n");
+        printf_s("Result:   %llX\n", (uint64)result);
+        printf_s("Expected: %llX\n", (uint64)expected);
+        printf_s("kernel32.dll address is incorrect\n");
         return false;
     }
-    printf_s("WinExec: 0x%llX\n", (uint64)proc);
+    printf_s("kernel32.dll: 0x%llX\n", (uint64)result);
     return true;
 }
 
@@ -61,8 +66,8 @@ bool TestFindAPI_MA()
     void* proc = FindAPI_MA(hModule, procHash, key);
     if (proc != &WinExec)
     {
-        printf_s("Result:  %llX\n", (uint64)proc);
-        printf_s("WinExec: %llX\n", (uint64)(&WinExec));
+        printf_s("Result:   %llX\n", (uint64)proc);
+        printf_s("Expected: %llX\n", (uint64)(&WinExec));
         printf_s("WinExec address is incorrect\n");
         return false;
     }
@@ -70,7 +75,7 @@ bool TestFindAPI_MA()
     return true;
 }
 
-bool TestFindAPI_MHL()
+bool TestFindAPI_MH()
 {
 #ifdef _WIN64
     uint key = 0x6A6867C72D518853;
@@ -80,18 +85,47 @@ bool TestFindAPI_MHL()
     byte* module    = "kernel32.dll";
     byte* procedure = "WinExec";
     uint  modHash   = CalcModHash_A(module, key);
-    uint  procHash  = CalcProcHash(procedure, key);\
+    uint  procHash  = CalcProcHash(procedure, key);
 
-    PML*  pml  = GetDefaultPML();
-    void* proc = FindAPI_MHL(pml, modHash, procHash, key);
+    void* proc = FindAPI_MH(modHash, procHash, key);
     if (proc != &WinExec)
     {
-        printf_s("Result:  %llX\n", (uint64)proc);
-        printf_s("WinExec: %llX\n", (uint64)(&WinExec));
+        printf_s("Result:   %llX\n", (uint64)proc);
+        printf_s("Expected: %llX\n", (uint64)(&WinExec));
         printf_s("WinExec address is incorrect\n");
         return false;
     }
     printf_s("WinExec: 0x%llX\n", (uint64)proc);
+    return true;
+}
+
+bool TestFindMod_MHL()
+{
+    HMODULE expected = LoadLibraryA("kernel32.dll");
+    if (expected == NULL)
+    {
+        printf_s("failed to load kernel32.dll\n");
+        return false;
+    }
+
+#ifdef _WIN64
+    uint key = 0x6A6867C72D518853;
+#elif _WIN32
+    uint key = 0xCADE960B;
+#endif
+    byte* module  = "kernel32.dll";
+    uint  modHash = CalcModHash_A(module, key);
+
+    PML*  pml    = GetDefaultPML();
+    void* result = FindMod_MHL(pml, modHash, key);
+    if (result != expected)
+    {
+        printf_s("Result:   %llX\n", (uint64)result);
+        printf_s("Expected: %llX\n", (uint64)expected);
+        printf_s("kernel32.dll address is incorrect\n");
+        return false;
+    }
+    printf_s("kernel32.dll: 0x%llX\n", (uint64)result);
     return true;
 }
 
@@ -116,12 +150,151 @@ bool TestFindAPI_MAL()
     void* proc = FindAPI_MAL(pml, hModule, procHash, key);
     if (proc != &WinExec)
     {
-        printf_s("Result:  %llX\n", (uint64)proc);
-        printf_s("WinExec: %llX\n", (uint64)(&WinExec));
+        printf_s("Result:   %llX\n", (uint64)proc);
+        printf_s("Expected: %llX\n", (uint64)(&WinExec));
         printf_s("WinExec address is incorrect\n");
         return false;
     }
     printf_s("WinExec: 0x%llX\n", (uint64)proc);
+    return true;
+}
+
+bool TestFindAPI_MHL()
+{
+#ifdef _WIN64
+    uint key = 0x6A6867C72D518853;
+#elif _WIN32
+    uint key = 0xCADE960B;
+#endif
+    byte* module    = "kernel32.dll";
+    byte* procedure = "WinExec";
+    uint  modHash   = CalcModHash_A(module, key);
+    uint  procHash  = CalcProcHash(procedure, key);
+
+    PML*  pml  = GetDefaultPML();
+    void* proc = FindAPI_MHL(pml, modHash, procHash, key);
+    if (proc != &WinExec)
+    {
+        printf_s("Result:   %llX\n", (uint64)proc);
+        printf_s("Expected: %llX\n", (uint64)(&WinExec));
+        printf_s("WinExec address is incorrect\n");
+        return false;
+    }
+    printf_s("WinExec: 0x%llX\n", (uint64)proc);
+    return true;
+}
+
+bool TestFindMod_A()
+{
+    HMODULE expected = LoadLibraryA("kernel32.dll");
+    if (expected == NULL)
+    {
+        printf_s("failed to load kernel32.dll\n");
+        return false;
+    }
+
+#ifdef _WIN64
+    uint key = 0x6A6867C72D518853;
+#elif _WIN32
+    uint key = 0xCADE960B;
+#endif
+    byte* module = "kernel32.dll";
+
+    void* result = FindMod_A(module, key);
+    if (result != expected)
+    {
+        printf_s("Result:   %llX\n", (uint64)result);
+        printf_s("Expected: %llX\n", (uint64)expected);
+        printf_s("kernel32.dll address is incorrect\n");
+        return false;
+    }
+    printf_s("kernel32.dll: 0x%llX\n", (uint64)result);
+    return true;
+}
+
+bool TestFindMod_W()
+{
+    HMODULE expected = LoadLibraryA("kernel32.dll");
+    if (expected == NULL)
+    {
+        printf_s("failed to load kernel32.dll\n");
+        return false;
+    }
+
+#ifdef _WIN64
+    uint key = 0x6A6867C72D518853;
+#elif _WIN32
+    uint key = 0xCADE960B;
+#endif
+    uint16* module = L"kernel32.dll";
+
+    void* result = FindMod_W(module, key);
+    if (result != expected)
+    {
+        printf_s("Result:   %llX\n", (uint64)result);
+        printf_s("Expected: %llX\n", (uint64)expected);
+        printf_s("kernel32.dll address is incorrect\n");
+        return false;
+    }
+    printf_s("kernel32.dll: 0x%llX\n", (uint64)result);
+    return true;
+}
+
+bool TestFindMod_AL()
+{
+    HMODULE expected = LoadLibraryA("kernel32.dll");
+    if (expected == NULL)
+    {
+        printf_s("failed to load kernel32.dll\n");
+        return false;
+    }
+
+#ifdef _WIN64
+    uint key = 0x6A6867C72D518853;
+#elif _WIN32
+    uint key = 0xCADE960B;
+#endif
+    byte* module = "kernel32.dll";
+
+    PML*  pml    = GetDefaultPML();
+    void* result = FindMod_AL(pml, module, key);
+    if (result != expected)
+    {
+        printf_s("Result:   %llX\n", (uint64)result);
+        printf_s("Expected: %llX\n", (uint64)expected);
+        printf_s("kernel32.dll address is incorrect\n");
+        return false;
+    }
+    printf_s("kernel32.dll: 0x%llX\n", (uint64)result);
+    return true;
+}
+
+bool TestFindMod_WL()
+{
+    HMODULE expected = LoadLibraryA("kernel32.dll");
+    if (expected == NULL)
+    {
+        printf_s("failed to load kernel32.dll\n");
+        return false;
+    }
+
+#ifdef _WIN64
+    uint key = 0x6A6867C72D518853;
+#elif _WIN32
+    uint key = 0xCADE960B;
+#endif
+    uint16* module = L"kernel32.dll";
+
+    PML*  pml    = GetDefaultPML();
+    void* result = FindMod_WL(pml, module, key);
+    if (result != expected)
+    {
+        printf_s("Result:   %llX\n", (uint64)result);
+        printf_s("Expected: %llX\n", (uint64)expected);
+        printf_s("kernel32.dll address is incorrect\n");
+        return false;
+    }
+    printf_s("kernel32.dll: 0x%llX\n", (uint64)result);
     return true;
 }
 
@@ -133,8 +306,8 @@ bool TestFindAPI_A()
     void* proc = FindAPI_A(module, procedure);
     if (proc != &WinExec)
     {
-        printf_s("Result:  %llX\n", (uint64)proc);
-        printf_s("WinExec: %llX\n", (uint64)(&WinExec));
+        printf_s("Result:   %llX\n", (uint64)proc);
+        printf_s("Expected: %llX\n", (uint64)(&WinExec));
         printf_s("WinExec address is incorrect\n");
         return false;
     }
@@ -150,8 +323,8 @@ bool TestFindAPI_W()
     void* proc = FindAPI_W(module, procedure);
     if (proc != &WinExec)
     {
-        printf_s("Result:  %llX\n", (uint64)proc);
-        printf_s("WinExec: %llX\n", (uint64)(&WinExec));
+        printf_s("Result:   %llX\n", (uint64)proc);
+        printf_s("Expected: %llX\n", (uint64)(&WinExec));
         printf_s("WinExec address is incorrect\n");
         return false;
     }
@@ -182,8 +355,8 @@ bool TestForwarded()
     void* proc = FindAPI_MH(modHash, procHash, key);
     if (proc != closeState)
     {
-        printf_s("Result:     %llX\n", (uint64)proc);
-        printf_s("CloseState: %llX\n", (uint64)closeState);
+        printf_s("Result:   %llX\n", (uint64)proc);
+        printf_s("Expected: %llX\n", (uint64)closeState);
         printf_s("CloseState address is incorrect\n");
         return false;
     }
