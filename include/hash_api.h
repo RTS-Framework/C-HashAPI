@@ -57,10 +57,10 @@ typedef void* (*FindAPI_MAL_t)(PML* pml, void* module, uint procedure, uint key)
 typedef void* (*FindAPI_MHL_t)(PML* pml, uint  module, uint procedure, uint key);
 
 // shortcut and simple tool for upper modules.
-typedef void* (FindMod_A_t)(byte*   module, uint key);
-typedef void* (FindMod_W_t)(uint16* module, uint key);
-typedef void* (FindMod_AL_t)(PML* pml, byte*   module, uint key);
-typedef void* (FindMod_WL_t)(PML* pml, uint16* module, uint key);
+typedef void* (*FindMod_A_t)(byte*   module, uint key);
+typedef void* (*FindMod_W_t)(uint16* module, uint key);
+typedef void* (*FindMod_AL_t)(PML* pml, byte*   module, uint key);
+typedef void* (*FindMod_WL_t)(PML* pml, uint16* module, uint key);
 
 // shortcut for debug, test and toolchain.
 typedef void* (*FindAPI_A_t)(byte*   module, byte* procedure);
