@@ -92,9 +92,9 @@ int strcmp_w(UTF16 a, UTF16 b)
 }
 
 __declspec(noinline)
-int strncmp_a(ANSI a, ANSI b, int64 n)
+int strncmp_a(ANSI a, ANSI b, uint n)
 {
-    for (int64 i = 0; i < n; i++)
+    for (uint i = 0; i < n; i++)
     {
         byte s0 = *a;
         byte s1 = *b;
@@ -119,9 +119,9 @@ int strncmp_a(ANSI a, ANSI b, int64 n)
 }
 
 __declspec(noinline)
-int strncmp_w(UTF16 a, UTF16 b, int64 n)
+int strncmp_w(UTF16 a, UTF16 b, uint n)
 {
-    for (int64 i = 0; i < n; i++)
+    for (uint i = 0; i < n; i++)
     {
         uint16 s0 = *a;
         uint16 s1 = *b;
@@ -200,9 +200,9 @@ int stricmp_w(UTF16 a, UTF16 b)
 }
 
 __declspec(noinline)
-int strnicmp_a(ANSI a, ANSI b, int64 n)
+int strnicmp_a(ANSI a, ANSI b, uint n)
 {
-    for (int64 i = 0; i < n; i++)
+    for (uint i = 0; i < n; i++)
     {
         byte s0 = lowercase_a(*a);
         byte s1 = lowercase_a(*b);
@@ -227,9 +227,9 @@ int strnicmp_a(ANSI a, ANSI b, int64 n)
 }
 
 __declspec(noinline)
-int strnicmp_w(UTF16 a, UTF16 b, int64 n)
+int strnicmp_w(UTF16 a, UTF16 b, uint n)
 {
-    for (int64 i = 0; i < n; i++)
+    for (uint i = 0; i < n; i++)
     {
         uint16 s0 = lowercase_w(*a);
         uint16 s1 = lowercase_w(*b);
@@ -315,10 +315,10 @@ uint strcpy_w(UTF16 dst, UTF16 src)
 }
 
 __declspec(noinline)
-uint strncpy_a(ANSI dst, ANSI src, int64 n)
+uint strncpy_a(ANSI dst, ANSI src, uint n)
 {
     uint l = 0;
-    for (int64 i = 0; i < n; i++)
+    for (uint i = 0; i < n; i++)
     {
         byte s = *src;
         *dst = s;
@@ -335,10 +335,10 @@ uint strncpy_a(ANSI dst, ANSI src, int64 n)
 }
 
 __declspec(noinline)
-uint strncpy_w(UTF16 dst, UTF16 src, int64 n)
+uint strncpy_w(UTF16 dst, UTF16 src, uint n)
 {
     uint l = 0;
-    for (int64 i = 0; i < n; i++)
+    for (uint i = 0; i < n; i++)
     {
         uint16 s = *src;
         *dst = s;
