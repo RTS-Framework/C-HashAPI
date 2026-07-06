@@ -28,7 +28,6 @@ bool TestCalcModHash32();
 bool TestCalcModHash64();
 bool TestCalcProcHash32();
 bool TestCalcProcHash64();
-
 #pragma warning(pop)
 
 typedef bool (*test_t)();
