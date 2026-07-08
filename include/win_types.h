@@ -3,9 +3,6 @@
 
 #include "c_types.h"
 
-// disable special warnings for /Wall
-#pragma warning(disable: 4142)
-
 typedef int32 BOOL;
 typedef uint8 BOOLEAN;
 
