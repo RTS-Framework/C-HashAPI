@@ -1,8 +1,8 @@
 #include "c_types.h"
 #include "win_types.h"
 #include "win_structs.h"
-#include "pe_image.h"
 #include "lib_memory.h"
+#include "pe_image.h"
 #include "hash_api.h"
 
 #ifdef _WIN64
