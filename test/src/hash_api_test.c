@@ -1,5 +1,3 @@
-#pragma warning(disable: 4668)
-
 #include <stdio.h>
 #include "c_types.h"
 #include "hash_api.h"
@@ -17,7 +15,63 @@ HMODULE __stdcall LoadLibraryA(LPSTR module);
 __declspec(dllimport)
 void* __stdcall GetProcAddress(HMODULE module, LPSTR procedure);
 
-bool TestFindMod_MH()
+static bool TestFindMod_MH();
+static bool TestFindAPI_MA();
+static bool TestFindAPI_MH();
+static bool TestFindMod_MHL();
+static bool TestFindAPI_MAL();
+static bool TestFindAPI_MHL();
+static bool TestFindMod_A();
+static bool TestFindMod_W();
+static bool TestFindMod_AL();
+static bool TestFindMod_WL();
+static bool TestFindAPI_A();
+static bool TestFindAPI_W();
+static bool TestForwarded();
+static bool TestNotFound();
+static bool TestNULLArgument();
+static bool TestCalcModHash32();
+static bool TestCalcModHash64();
+static bool TestCalcProcHash32();
+static bool TestCalcProcHash64();
+
+bool TestHashAPI()
+{
+    test_t tests[] = 
+    {
+        { TestFindMod_MH     },
+        { TestFindAPI_MA     },
+        { TestFindAPI_MH     },
+        { TestFindMod_MHL    },
+        { TestFindAPI_MAL    },
+        { TestFindAPI_MHL    },
+        { TestFindMod_A      },
+        { TestFindMod_W      },
+        { TestFindMod_AL     },
+        { TestFindMod_WL     },
+        { TestFindAPI_A      },
+        { TestFindAPI_W      },
+        { TestForwarded      },
+        { TestNotFound       },
+        { TestNULLArgument   },
+        { TestCalcModHash32  },
+        { TestCalcModHash64  },
+        { TestCalcProcHash32 },
+        { TestCalcProcHash64 },
+    };
+    for (int i = 0; i < arrlen(tests); i++)
+    {
+        printf_s("--------------------------------\n");
+        if (!tests[i]())
+        {
+            return false;
+        }
+        printf_s("--------------------------------\n\n");
+    }
+    return true;
+}
+
+static bool TestFindMod_MH()
 {
     HMODULE expected = LoadLibraryA("kernel32.dll");
     if (expected == NULL)
@@ -46,7 +100,7 @@ bool TestFindMod_MH()
     return true;
 }
 
-bool TestFindAPI_MA()
+static bool TestFindAPI_MA()
 {
     HMODULE hModule = LoadLibraryA("kernel32.dll");
     if (hModule == NULL)
@@ -75,7 +129,7 @@ bool TestFindAPI_MA()
     return true;
 }
 
-bool TestFindAPI_MH()
+static bool TestFindAPI_MH()
 {
 #ifdef _WIN64
     uint key = 0x6A6867C72D518853;
@@ -99,7 +153,7 @@ bool TestFindAPI_MH()
     return true;
 }
 
-bool TestFindMod_MHL()
+static bool TestFindMod_MHL()
 {
     HMODULE expected = LoadLibraryA("kernel32.dll");
     if (expected == NULL)
@@ -129,7 +183,7 @@ bool TestFindMod_MHL()
     return true;
 }
 
-bool TestFindAPI_MAL()
+static bool TestFindAPI_MAL()
 {
     HMODULE hModule = LoadLibraryA("kernel32.dll");
     if (hModule == NULL)
@@ -159,7 +213,7 @@ bool TestFindAPI_MAL()
     return true;
 }
 
-bool TestFindAPI_MHL()
+static bool TestFindAPI_MHL()
 {
 #ifdef _WIN64
     uint key = 0x6A6867C72D518853;
@@ -184,7 +238,7 @@ bool TestFindAPI_MHL()
     return true;
 }
 
-bool TestFindMod_A()
+static bool TestFindMod_A()
 {
     HMODULE expected = LoadLibraryA("kernel32.dll");
     if (expected == NULL)
@@ -212,7 +266,7 @@ bool TestFindMod_A()
     return true;
 }
 
-bool TestFindMod_W()
+static bool TestFindMod_W()
 {
     HMODULE expected = LoadLibraryA("kernel32.dll");
     if (expected == NULL)
@@ -240,7 +294,7 @@ bool TestFindMod_W()
     return true;
 }
 
-bool TestFindMod_AL()
+static bool TestFindMod_AL()
 {
     HMODULE expected = LoadLibraryA("kernel32.dll");
     if (expected == NULL)
@@ -269,7 +323,7 @@ bool TestFindMod_AL()
     return true;
 }
 
-bool TestFindMod_WL()
+static bool TestFindMod_WL()
 {
     HMODULE expected = LoadLibraryA("kernel32.dll");
     if (expected == NULL)
@@ -298,7 +352,7 @@ bool TestFindMod_WL()
     return true;
 }
 
-bool TestFindAPI_A()
+static bool TestFindAPI_A()
 {
     byte* module    = "kernel32.dll";
     byte* procedure = "WinExec";
@@ -315,7 +369,7 @@ bool TestFindAPI_A()
     return true;
 }
 
-bool TestFindAPI_W()
+static bool TestFindAPI_W()
 {
     uint16* module    = L"kernel32.dll";
     byte*   procedure = "WinExec";
@@ -332,7 +386,7 @@ bool TestFindAPI_W()
     return true;
 }
 
-bool TestForwarded()
+static bool TestForwarded()
 {
     HMODULE hModule = LoadLibraryA("kernel32.dll");
     if (hModule == NULL)
@@ -364,7 +418,7 @@ bool TestForwarded()
     return true;
 }
 
-bool TestNotFound()
+static bool TestNotFound()
 {
     void* proc = FindAPI_MH(0x1234, 0x5678, 0x1212);
     if (proc != NULL)
@@ -388,7 +442,7 @@ bool TestNotFound()
     return true;
 }
 
-bool TestNULLArgument()
+static bool TestNULLArgument()
 {
     void* proc = FindAPI_MHL(NULL, 0x1234, 0x5678, 0x1212);
     if (proc != NULL)
@@ -407,7 +461,7 @@ bool TestNULLArgument()
     return true;
 }
 
-bool TestCalcModHash32()
+static bool TestCalcModHash32()
 {
     byte*   module_a = "kernel32.dll";
     uint16* module_w = L"kernel32.dll";
@@ -430,7 +484,7 @@ bool TestCalcModHash32()
     return true;
 }
 
-bool TestCalcModHash64()
+static bool TestCalcModHash64()
 {
     byte*   module_a = "kernel32.dll";
     uint16* module_w = L"kernel32.dll";
@@ -453,7 +507,7 @@ bool TestCalcModHash64()
     return true;
 }
 
-bool TestCalcProcHash32()
+static bool TestCalcProcHash32()
 {
     byte*  proc = "WinExec";
     uint32 key  = 0xCADE960B;
@@ -468,7 +522,7 @@ bool TestCalcProcHash32()
     return true;
 }
 
-bool TestCalcProcHash64()
+static bool TestCalcProcHash64()
 {
     byte*  proc = "WinExec";
     uint64 key  = 0x7A61A1C72F518C54;
