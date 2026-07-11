@@ -4,6 +4,8 @@
 #include "c_types.h"
 #include "win_types.h"
 
+typedef void* HMODULE;
+
 typedef UINT (*WinExec_t)
 (
     LPCSTR lpCmdLine, UINT uCmdShow
