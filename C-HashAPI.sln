@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "win_exec", "example\win_exe
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "test\test.vcxproj", "{702B54DE-F4F0-448E-97BB-4F146C4FC3CE}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "find_mod", "example\find_mod\find_mod.vcxproj", "{F0559B52-1769-4B27-A21D-7BE122BD917C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Release|x64 = Release|x64
@@ -21,6 +23,10 @@ Global
 		{702B54DE-F4F0-448E-97BB-4F146C4FC3CE}.Release|x64.Build.0 = Release|x64
 		{702B54DE-F4F0-448E-97BB-4F146C4FC3CE}.Release|x86.ActiveCfg = Release|Win32
 		{702B54DE-F4F0-448E-97BB-4F146C4FC3CE}.Release|x86.Build.0 = Release|Win32
+		{F0559B52-1769-4B27-A21D-7BE122BD917C}.Release|x64.ActiveCfg = Release|x64
+		{F0559B52-1769-4B27-A21D-7BE122BD917C}.Release|x64.Build.0 = Release|x64
+		{F0559B52-1769-4B27-A21D-7BE122BD917C}.Release|x86.ActiveCfg = Release|Win32
+		{F0559B52-1769-4B27-A21D-7BE122BD917C}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
