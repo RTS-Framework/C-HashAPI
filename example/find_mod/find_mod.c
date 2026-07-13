@@ -1,9 +1,10 @@
+#include <stdio.h>
 #include "c_types.h"
 #include "windows_t.h"
 #include "hash_api.h"
 
-#pragma comment(linker, "/ENTRY:EntryMain")
-uint EntryMain() {
+int __cdecl main()
+{
 #ifdef _WIN64
     uint mHash = 0x2A5175AD1A0CECBC;
     uint hKey  = 0x7A61A1C72F518C54;
@@ -16,5 +17,6 @@ uint EntryMain() {
     {
         return 1;
     }
+    printf_s("kernel32.dll: 0x%zX\n", (uint)hKernel32);
     return 0;
 }
