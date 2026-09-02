@@ -25,11 +25,11 @@ typedef unsigned int       uint32;
 typedef unsigned long long uint64;
 
 #ifdef _WIN64
-    typedef int64  integer;
+    typedef int64  intx;
     typedef uint64 uint;
     typedef uint64 uintptr;
 #elif _WIN32
-    typedef int32  integer;
+    typedef int32  intx;
     typedef uint32 uint;
     typedef uint32 uintptr;
 #endif
@@ -71,8 +71,8 @@ typedef struct {
 
 // process memory page or data size alignment
 // argument a must be a power of two
-#define align_up(x, a)   (((x) + ((a)-1)) & ~((a)-1))
-#define align_down(x, a) (((x) + (00000)) & ~((a)-1))
+#define alignup(x, a)   (((x) + ((a)-1)) & ~((a)-1))
+#define aligndown(x, a) (((x) + (00000)) & ~((a)-1))
 
 // calculate the array length
 #ifndef arrlen
@@ -86,6 +86,7 @@ typedef struct {
 
 // reference panic from Go
 #define PANIC_UNREACHABLE_CODE 0x00000000
+#define PANIC_INVALID_ARGUMENT 0x00000001
 #define PANIC_REACHABLE_TEST   0x00001000
 
 #ifndef panic
